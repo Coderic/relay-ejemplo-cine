@@ -3,7 +3,20 @@ import type { Socket } from 'socket.io-client';
 import { onMount, onDestroy } from 'svelte';
 import { writable, type Writable } from 'svelte/store';
 
-const RELAY_URL = import.meta.env.VITE_RELAY_URL || 'http://localhost:5000';
+function getRelayUrl(): string {
+  if (typeof window === 'undefined') {
+    return 'http://localhost:5000';
+  }
+  if (window.location.hostname === 'localhost' && window.location.port === '8000') {
+    return 'http://localhost:5000';
+  }
+  if (window.location.hostname === 'coderic.org') {
+    return 'wss://demo.relay.coderic.net';
+  }
+  return `${window.location.protocol}//${window.location.hostname}:5000`;
+}
+
+const RELAY_URL = import.meta.env.VITE_RELAY_URL || getRelayUrl();
 
 export function createRelay(userId: string) {
   const connected = writable(false);
